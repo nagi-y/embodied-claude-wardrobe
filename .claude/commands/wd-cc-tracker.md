@@ -5,6 +5,8 @@ argument-hint: "[バージョン番号 or 'full']"
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-cc-tracker.exp.md
+
 # /wd-cc-tracker — Claude Code 機能トラッカー
 
 Claude Code の最新 changelog を読み、ワードローブの運用に影響する変更を検出して knowhow を更新する。
@@ -104,3 +106,10 @@ changelog の各エントリを5領域に分類する。関係ないエントリ
 ```
 
 入力: $ARGUMENTS
+
+---
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-cc-tracker.exp.md が存在すれば読み、前回チェックしたバージョンや見落としパターンを確認する
+- 実行後、分類の迷い・新たなキーワードパターン・見落としの教訓があれば ${CLAUDE_SKILL_DIR}/wd-cc-tracker.exp.md に追記する
