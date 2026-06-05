@@ -34,5 +34,14 @@ if [ -f "$PROJECT_DIR/state.md" ]; then
   echo ""
 fi
 
+# --- ROUTINES.md 注入 ---
+if [ -f "$PROJECT_DIR/ROUTINES.md" ]; then
+  echo "--- ROUTINES.md ---"
+  cat "$PROJECT_DIR/ROUTINES.md"
+  echo ""
+  echo "--- end ROUTINES.md ---"
+  echo ""
+fi
+
 # --- 身支度の案内 ---
 echo "SOUL.md と state.md は自動注入済み。BOOT_SHUTDOWN.md の身支度手順に従い、残りを実行してください。"
