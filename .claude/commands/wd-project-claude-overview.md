@@ -9,6 +9,8 @@ description: |
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-project-claude-overview.exp.md
+
 # project-claude-overview — エコシステム概要生成
 
 ## 目的

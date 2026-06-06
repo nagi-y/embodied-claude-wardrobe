@@ -5,6 +5,8 @@ argument-hint: "[--dry-run] [--yes]"
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-migrate.exp.md
+
 # /wd-migrate — アップストリーム更新の取り込み
 
 アップストリーム（embodied-claude-wardrobe）の最新版をダウンストリーム（現在の環境）に安全にマイグレーションする。
@@ -295,5 +297,10 @@ rm -rf "$TMPDIR"
 - MCP サーバーの変更後は再起動が必要: `claude mcp restart <server-name>`
 - `settings.json` のマージ後に意図しない権限変更がないか確認すること
 - `CLAUDE.md` のコンフリクト解消後は必ず動作確認すること
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-migrate.exp.md が存在すれば読み、過去の経験を考慮する
+- 実行後、新たな教訓があれば ${CLAUDE_SKILL_DIR}/wd-migrate.exp.md に追記する
 
 入力: $ARGUMENTS
