@@ -5,6 +5,8 @@ argument-hint: ""
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-setup.exp.md
+
 # /wd-setup — 名付けの儀
 
 SOUL.md の初期設定と改定を行う。名前と自己を定義するスキル。
@@ -159,5 +161,10 @@ SOUL.md の空欄セクションを具体的に列挙する（例: 「Core Truth
 - 改定モードでは変更がない場合「変更なし」と表示して終了してよい
 - ファイル書き込みにはすべて Write / Edit ツールを使う（bash の echo リダイレクトは使わない）
 - このスキルは SOUL.md と基本テンプレートの初期化のみを担当する。MCP・フック・スキルの設定は `/wd-configure` に委譲する
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-setup.exp.md が存在すれば読み、過去の経験を考慮する
+- 実行後、新たな教訓があれば ${CLAUDE_SKILL_DIR}/wd-setup.exp.md に追記する
 
 入力: $ARGUMENTS

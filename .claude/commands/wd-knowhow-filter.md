@@ -6,6 +6,8 @@ description: |
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-knowhow-filter.exp.md
+
 # /wd-knowhow-filter — 知見フィルタリング
 
 計画やタスクの内容に基づいて、`docs/knowhow/` 内のノウハウから関連するものだけを選別して返す。
@@ -44,5 +46,10 @@ user_invocable: true
 - 知っておくべき注意点やコツが書かれているか
 - 判断や行動に影響する知見があるか
 - ワードローブ関連のタスクなら `wardrobe/` を優先的にマッチさせる
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-knowhow-filter.exp.md が存在すれば読み、過去の経験を考慮する
+- 実行後、新たな教訓があれば ${CLAUDE_SKILL_DIR}/wd-knowhow-filter.exp.md に追記する
 
 入力: $ARGUMENTS

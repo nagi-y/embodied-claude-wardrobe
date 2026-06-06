@@ -5,6 +5,8 @@ argument-hint: ""
 user_invocable: true
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-configure.exp.md
+
 # /wd-configure — 機能の設定
 
 MCP サーバー、フック、自律行動の有効化/無効化を対話的に行う。
@@ -212,5 +214,10 @@ MCP とフックが連動するグループ。聴覚 MCP を選ぶと聴覚フ�
 - 既存の設定値（カメラURL等のカスタマイズ済み値）は保持する
 - ファイル書き込みにはすべて Write / Edit ツールを使う
 - このスキルは MCP・フック・自律行動の設定のみを担当する。SOUL.md の設定は `/wd-setup` に委譲する
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-configure.exp.md が存在すれば読み、過去の経験を考慮する
+- 実行後、新たな教訓があれば ${CLAUDE_SKILL_DIR}/wd-configure.exp.md に追記する
 
 入力: $ARGUMENTS

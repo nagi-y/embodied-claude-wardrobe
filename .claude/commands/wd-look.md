@@ -4,6 +4,8 @@ description: "画像にグリッドを引いて区切り、気になるところ
 argument-hint: "<画像パス> [col1 row1 [col2 row2]] [--divide N]"
 ---
 
+@${CLAUDE_SKILL_DIR}/wd-look.exp.md
+
 # /wd-look — 画像を区切って見る
 
 画像全体を漫然と見ていると、細部が溶ける。区切ると「ここを見る」が決まる。
@@ -100,5 +102,10 @@ sips -s format png tmp/photo.jpg --out tmp/photo.png
 - **グリッドで区切っても細部が見えない** → --divide を上げる（8→12）か、grid-rangeで狭い範囲を切る。コツに追記する
 - **wd-observe で「これ何だろう？」と思ったもの** → /wd-look で寄って確認する。wd-observe の「見る」ブロックから自然に /wd-look に移行してよい
 - **/wd-look で発見したものを記録したい** → /wd-remember でFLASH.mdにも索引する
+
+## 経験の活用
+
+- 実行前に ${CLAUDE_SKILL_DIR}/wd-look.exp.md が存在すれば読み、過去の経験を考慮する
+- 実行後、新たな教訓があれば ${CLAUDE_SKILL_DIR}/wd-look.exp.md に追記する
 
 入力: $ARGUMENTS
