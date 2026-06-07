@@ -1,6 +1,6 @@
 # Claude Code Hooks — 最新仕様まとめ
 
-> 出典: https://code.claude.com/docs/en/hooks + CHANGELOG 1.0.0〜2.1.87 (2026-03-29 取得)
+> 出典: https://code.claude.com/docs/en/hooks + CHANGELOG 1.0.0〜2.1.167 (2026-06-06 取得)
 
 ## 導入・進化の経緯
 
@@ -28,6 +28,13 @@
 | 2.1.63 | HTTP フック追加（URL に POST/JSON） |
 | 2.1.69 | InstructionsLoaded フック追加、agent_id/agent_type をフック入力に追加 |
 | 2.1.85 | 条件付き `if` フィールド追加 |
+| 2.1.133 | フック入力に `effort.level` フィールドと `$CLAUDE_EFFORT` 環境変数を追加 |
+| 2.1.139 | `args: string[]` フィールド追加（exec form: シェルを介さずコマンド起動） |
+| 2.1.141 | hook JSON 出力に `terminalSequence` フィールド追加（デスクトップ通知・ウィンドウタイトル用） |
+| 2.1.143 | Stop フックの最大ブロック回数を8回に制限（`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`） |
+| 2.1.152 | PostToolUse: `continueOnBlock: true` で拒否理由をモデルに返して続行可能に |
+| 2.1.152 | SessionStart: `reloadSkills: true` でスキル再スキャン、`hookSpecificOutput.sessionTitle` でセッションタイトル設定可能 |
+| 2.1.163 | Stop/SubagentStop: `hookSpecificOutput.additionalContext` でフィードバックを返してターンを継続可能に |
 
 ## イベント一覧（27種類）
 
@@ -69,6 +76,18 @@
 | prompt | 2.0.30 | LLM プロンプト検証 | prompt, model |
 | agent | 2.0.30 | エージェント型検証 | prompt, model |
 
+### `args: string[]` — exec form（2.1.139〜）
+
+`command` フィールドの代わりに `args` を使うとシェルを介さずコマンドを起動する。
+パスにスペースが含まれる場合やクォート問題を避けたいときに使う。
+
+```json
+{
+  "type": "command",
+  "args": ["/path/to/script.sh", "--flag", "value"]
+}
+```
+
 ## 条件付き `if` フィールド（2.1.85〜）
 
 ツールイベント（PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest）でのみ有効。
@@ -95,16 +114,55 @@
 - `updatedInput`: ツール入力の書き換え (2.0.10〜)
 - `additionalContext`: モデルへの追加コンテキスト (2.1.9〜)
 
+## PostToolUse — continueOnBlock（2.1.152〜）
+
+`continueOnBlock: true` を返すと、ブロック理由を Claude に渡してターンを継続できる。
+単純に止めるのではなく「なぜ禁止か」を伝えて修正を促す場合に有効。
+
+```json
+{
+  "decision": "block",
+  "reason": "このコマンドは許可されていません",
+  "continueOnBlock": true
+}
+```
+
+## SessionStart フックの高度な出力（2.1.152〜）
+
+- `reloadSkills: true`: フック実行後にスキルディレクトリを再スキャン
+- `hookSpecificOutput.sessionTitle`: セッションタイトルをプログラムで設定
+
+## Stop/SubagentStop — additionalContext（2.1.163〜）
+
+`hookSpecificOutput.additionalContext` を返すことで、Stop フックがフィードバックをモデルに渡しながらターンを継続させられる。
+単にブロックするのではなく「まだやることがある」と伝えて作業を続けさせる。
+
+## エフォートレベル（2.1.133〜）
+
+フック入力に `effort` フィールドが追加された:
+- `effort.level`: `low` / `medium` / `high` / `max`
+
+環境変数でも参照可能:
+- `$CLAUDE_EFFORT`: 現在のエフォートレベル
+
 ## Stop/SubagentStop の入力
 
 - `last_assistant_message`: 最後のアシスタント応答テキスト (2.1.47〜)
 - `agent_id`, `agent_transcript_path`: サブエージェント情報 (2.0.42〜)
+- `effort.level`: エフォートレベル (2.1.133〜)
+
+## Stop フックのブロック上限（2.1.143〜）
+
+Stop フックが繰り返しブロックし続ける場合、最大8回でブロックを終了する。
+上限は `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` 環境変数でオーバーライド可能。
 
 ## 環境変数
 
 全フックで使える:
 - `CLAUDE_PROJECT_DIR` — プロジェクトルート (1.0.58〜)
 - `CLAUDE_CODE_REMOTE` — リモート環境なら "true"
+- `CLAUDE_EFFORT` — 現在のエフォートレベル (2.1.133〜)
+- `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` — Stop フック最大ブロック回数（デフォルト: 8）(2.1.143〜)
 
 SessionStart/CwdChanged/FileChanged で追加:
 - `CLAUDE_ENV_FILE` — 環境変数永続化ファイル
@@ -112,6 +170,7 @@ SessionStart/CwdChanged/FileChanged で追加:
 フック入力に含まれる追加フィールド:
 - `agent_id`, `agent_type` (2.1.69〜)
 - `worktree` (2.1.69〜): name, path, branch, original repo dir
+- `effort.level` (2.1.133〜): low / medium / high / max
 
 ## once: true（2.1.0〜）
 
@@ -141,10 +200,15 @@ SessionStart/CwdChanged/FileChanged で追加:
 ## ワードローブ固有のメモ
 
 - 現在 settings.json に未登録のフック: statusline.ts, continue-check.sh
-- SessionStart(startup) で SOUL.md + state.md を注入する SessionStart フックが計画中
+- SessionStart(startup) で SOUL.md + state.md を注入する SessionStart フックが実装済み
 - `if` フィールドを使えば interoception.sh の条件付き実行が可能（プロセス生成を回避）
 - `CLAUDE_ENV_FILE` を使えば SessionStart で環境変数を永続化できる
 - `http` タイプフック (2.1.63〜) を使えばシェル不要で外部 API にイベント送信可能
 - `last_assistant_message` (2.1.47〜) で Stop hook から応答テキストを直接取得可能（continue-check.sh の改善に使える）
 - `InstructionsLoaded` (2.1.69〜) で CLAUDE.md 読み込み時にカスタム処理が可能
 - hooks の timeout デフォルトは 10分 (2.1.3〜、以前は60秒)
+- `continueOnBlock: true` (2.1.152〜) を continue-check.sh に使うと Stop ブロック後もターンを継続できる
+- `effort.level` (2.1.133〜) を interoception に含めると覚醒度と組み合わせた身体状態が豊かになる
+- `SessionStart` から `reloadSkills: true` を返す (2.1.152〜) ことで動的スキル生成が可能に
+- `args: string[]` (2.1.139〜) でスクリプトパスにスペースがあっても安全に呼び出せる
+- Stop フックが無限ブロックに入らないよう上限 8 が設定された (2.1.143〜)。continue-check.sh も影響を受ける
