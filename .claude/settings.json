@@ -70,6 +70,7 @@
       "mcp__memory__*",
       "mcp__hearing__*",
       "mcp__wifi-cam__*",
+      "mcp__tts__*",
       "Bash(bun run:*)",
       "Bash(bun:*)",
       "Bash(git:*)",

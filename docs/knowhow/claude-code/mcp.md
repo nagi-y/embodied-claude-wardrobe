@@ -1,6 +1,6 @@
 # Claude Code MCP — 最新仕様まとめ
 
-> 出典: https://code.claude.com/docs/en/mcp + CHANGELOG 1.0.0〜2.1.87 (2026-03-29 取得)
+> 出典: https://code.claude.com/docs/en/mcp + CHANGELOG 1.0.0〜2.1.167 (2026-06-06 取得)
 
 ## 導入・進化の経緯
 
@@ -26,6 +26,11 @@
 | 2.1.30 | --client-id/--client-secret で OAuth クライアント資格情報 |
 | 2.1.46 | claude.ai MCP connectors を Claude Code で使用可能 |
 | 2.1.85 | CLAUDE_CODE_MCP_SERVER_NAME/URL 環境変数を headersHelper に追加 |
+| 2.1.132 | Bash ツールのサブプロセスに `CLAUDE_CODE_SESSION_ID` が渡されるように（MCP と同様に） |
+| 2.1.139 | stdio MCP サーバーが `CLAUDE_PROJECT_DIR` を環境変数として受け取るように |
+| 2.1.145 | リモート MCP サーバーが `x-claude-code-agent-id` / `x-claude-code-parent-agent-id` ヘッダーを自動付与 |
+| 2.1.157 | stdio MCP サーバーが `CLAUDE_CODE_SESSION_ID` と `CLAUDECODE=1` を受け取るように |
+| 2.1.163 | stdio MCP サーバーが `--resume` 時にも `CLAUDE_CODE_SESSION_ID` を受け取るように |
 
 ## .mcp.json の設定
 
@@ -118,6 +123,18 @@ claude mcp remove my-server
 
 mcpServers フィールドでサブエージェント専用 MCP を定義。インライン定義はメイン会話のコンテキストに影響しない。
 
+## stdio MCP が受け取る環境変数（まとめ）
+
+| 変数名 | 説明 | 追加時期 |
+|---|---|---|
+| `CLAUDE_PROJECT_DIR` | プロジェクトルートのパス | 2.1.139 |
+| `CLAUDE_CODE_SESSION_ID` | セッション ID（--resume 時も含む） | 2.1.157 |
+| `CLAUDECODE` | `1` 固定（Claude Code から起動されたことを判別） | 2.1.157 |
+
+リモート MCP サーバーへのリクエストには自動的に以下のヘッダーが付与される（2.1.145〜）:
+- `x-claude-code-agent-id`
+- `x-claude-code-parent-agent-id`
+
 ## ワードローブ固有のメモ
 
 - `${PWD}` を CLAUDE_PROJECT_DIR として全 MCP に渡す設定を導入済み
@@ -127,3 +144,5 @@ mcpServers フィールドでサブエージェント専用 MCP を定義。イ�
 - MCP ツール検索自動モードにより、ツールが多い環境でもコンテキスト節約
 - list_changed (2.1.0〜) で MCP サーバーが再接続なしにツール更新を通知可能
 - claude.ai MCP connectors (2.1.46〜) は外部 SaaS の MCP を Claude Code から利用する手段
+- memory-mcp は `CLAUDE_PROJECT_DIR` と `CLAUDE_CODE_SESSION_ID` を受け取れるようになった（2.1.139〜）。セッション別の記憶分離が可能に
+- `CLAUDECODE=1` を確認することで、MCP サーバー側が Claude Code からの起動かどうかを判別できる
