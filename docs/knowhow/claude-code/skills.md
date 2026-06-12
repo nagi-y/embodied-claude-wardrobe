@@ -1,6 +1,6 @@
 # Claude Code Skills — 最新仕様まとめ
 
-> 出典: https://code.claude.com/docs/en/skills + CHANGELOG 1.0.0〜2.1.87 (2026-03-29 取得)
+> 出典: https://code.claude.com/docs/en/skills + CHANGELOG 1.0.0〜2.1.167 (2026-06-06 取得)
 
 ## 導入・進化の経緯
 
@@ -20,6 +20,14 @@
 | 2.1.32 | skill 文字バジェットがコンテキストウィンドウの2%にスケール |
 | 2.1.63 | /simplify, /batch バンドルスキル追加 |
 | 2.1.69 | ${CLAUDE_SKILL_DIR} 変数追加 |
+| 2.1.133 | サブエージェントがプロジェクト・ユーザー・プラグインスキルを検出できない不具合を修正 |
+| 2.1.139 | `Skill(name *)` パーミッションルールのプレフィックスマッチ追加 |
+| 2.1.142 | プラグインのルートレベル `SKILL.md` をスキルとして認識 |
+| 2.1.152 | `disallowedTools` frontmatter 追加（スキル有効中にツールを削除）|
+| 2.1.152 | `skillOverrides` 設定が有効化（`off` / `user-invocable-only` / `name-only`）|
+| 2.1.157 | `.claude/skills` ディレクトリのプラグインが自動読み込み（マーケットプレイス不要） |
+| 2.1.157 | `claude plugin init <name>` でプラグインのスキャフォールド生成 |
+| 2.1.163 | `\$` エスケープ構文追加（数字の前にリテラルの `$` を使う場合） |
 
 ## ディレクトリ構造
 
@@ -52,6 +60,7 @@ my-skill/
 | hooks | No | スキルのライフサイクルフック | 2.1.0 |
 | paths | No | ファイルパターンで自動有効化 | 不明 |
 | shell | No | bash（デフォルト）or powershell | 不明 |
+| disallowedTools | No | スキル有効中に使用禁止にするツール一覧 | 2.1.152 |
 
 ## 変数展開
 
@@ -61,6 +70,11 @@ my-skill/
 | $ARGUMENTS[N] / $N | N番目の引数（0-based） | 2.1.19 |
 | ${CLAUDE_SESSION_ID} | セッション ID | 2.1.9 |
 | ${CLAUDE_SKILL_DIR} | SKILL.md のあるディレクトリ | 2.1.69 |
+
+### `\$` エスケープ（2.1.163〜）
+
+数字の前にリテラルの `$` を書きたい場合は `\$` でエスケープする。
+（例: `\$1` → 展開されずに `$1` として出力）
 
 ## 動的コンテキスト注入（1.0.30〜）
 
@@ -88,16 +102,39 @@ my-skill/
 | disable-model-invocation: true | Yes | No | description なし |
 | user-invocable: false | No | Yes | description 常時 |
 
+### skillOverrides 設定（2.1.152〜）
+
+`settings.json` の `skillOverrides` で個別スキルの表示を上書き:
+- `off`: モデルにも `/` メニューにも非表示
+- `user-invocable-only`: モデルには非表示、ユーザー呼び出しのみ
+- `name-only`: description を折りたたみ（名前だけ表示）
+
+### Skill パーミッションのプレフィックスマッチ（2.1.139〜）
+
+`Skill(name *)` 形式でワイルドカードマッチが可能。
+例: `Skill(wd-*)` でワードローブ全スキルを一括許可。
+
+## `.claude/skills` ディレクトリ（2.1.157〜）
+
+プラグインを `.claude/skills/<name>/` に配置すると、マーケットプレイスなしで自動読み込みされる。
+ルートレベルの `SKILL.md` を持つプラグインはスキルとして認識される（2.1.142〜）。
+
+`claude plugin init <name>` で新しいプラグインの雛形を生成できる。
+
 ## description の文字バジェット
 
 コンテキストウィンドウの2%（2.1.32〜）。各エントリは250文字で truncate。キーワードを冒頭に置くこと。
 
 ## ワードローブ固有のメモ
 
-- ワードローブのスキルは .claude/commands/*.md（旧形式）。.claude/skills/ への移行を検討
+- ワードローブのスキルは .claude/commands/*.md（旧形式）。.claude/skills/ への移行を検討（2.1.157 で自動読み込みが改善）
 - SKILL.md のサポートファイル機能で大きなリファレンスを別ファイルに分離可能
 - context:fork + agent:Explore で knowhow-filter を効率化できる可能性
 - paths フィールドでファイルパターンに応じた自動スキル有効化が可能
 - ${CLAUDE_SKILL_DIR} でスキルディレクトリの絶対パスを取得可能（スクリプト参照に便利）
 - `!`command`` 構文で git 情報等を動的にスキルに埋め込める
 - /batch はワークツリーで並列エージェントを起動。大規模リファクタに有用
+- `Skill(wd-*)` パーミッションルールでワードローブ全スキルを一括許可できる（2.1.139〜）
+- `disallowedTools` frontmatter を使えばスキル実行中に不要なツールを排除して安全性を高められる（2.1.152〜）
+- サブエージェントからスキルを呼び出す際は v2.1.133 以降であることを確認（以前はスキル検出バグあり）
+- `\$` エスケープ（2.1.163〜）: スキル内で `$1` のようなシェル変数リテラルを書く場合に使う
