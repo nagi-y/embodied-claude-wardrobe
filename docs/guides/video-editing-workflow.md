@@ -6,6 +6,10 @@ Anthropic の動画（Claude 自身が編集したもの）で話者本人が解
 スクリプト一式は [`tools/video-editing/`](../../tools/video-editing/) にある。
 初回は `bash tools/video-editing/setup.sh` で前提（ffmpeg / uv）を確認すること。
 
+**ふだんの編集依頼は `/wd-video-edit <素材フォルダ> [用途]` を使う。**
+イベント風景まとめ・講座アーカイブ（区切りカード＋YouTube チャプター）・リール用ダイジェスト（9:16）の
+レシピが入っていて、足りない情報はスキルがヒアリングする。このガイドは仕組みを理解したい人向け。
+
 ## 全体像
 
 ```
