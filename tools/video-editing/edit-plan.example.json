@@ -1,0 +1,52 @@
+{
+  "_comment": "編集プランの書式例。パスはこの JSON からの相対パス。size を指定すると全シーンをその解像度に統一する（リールは 1080x1920）。filter はシーン個別にも全体にも指定できる（カラーグレーディング用 FFmpeg フィルタ）。bgm は完成動画全体にミックスされる",
+  "output": "roughcut.mp4",
+  "size": "1920x1080",
+  "fit": "crop",
+  "fps": 30,
+  "filter": "eq=contrast=1.05:saturation=1.1:brightness=0.02",
+  "bgm": { "file": "assets/bgm.mp3", "volume": 0.2, "fade": 2 },
+  "scenes": [
+    {
+      "scene": 1,
+      "type": "card",
+      "image": "cards/title.png",
+      "duration": 3,
+      "_comment": "カードは make_card.py で生成できる。uv run make_card.py \"タイトル\" cards/title.png --size 1920x1080"
+    },
+    {
+      "scene": 2,
+      "title": "イントロ：課題の提示",
+      "candidates": ["takes/IMG_0101.mov", "takes/IMG_0102.mov", "takes/IMG_0103.mov"],
+      "chosen": "takes/IMG_0103.mov",
+      "reason": "言い淀みがなく、冒頭のつかみのテンポが最も良い。IMG_0101 は中盤で言い直しあり",
+      "in": 4.2,
+      "out": 41.8
+    },
+    {
+      "scene": 3,
+      "type": "card",
+      "image": "cards/section2.png",
+      "duration": 3
+    },
+    {
+      "scene": 4,
+      "title": "デモ：ワークフローの実演",
+      "candidates": ["takes/IMG_0104.mov", "takes/IMG_0105.mov"],
+      "chosen": "takes/IMG_0104.mov",
+      "reason": "説明の順序が台本に忠実。IMG_0105 は途中でカメラ目線が外れる",
+      "in": 2.0,
+      "out": 95.5,
+      "filter": "eq=contrast=1.08:saturation=1.05"
+    },
+    {
+      "scene": 5,
+      "title": "会場の風景",
+      "chosen": "takes/IMG_0110.mov",
+      "reason": "イベントまとめ用の風景カット。BGM に乗せるので元音声はミュート",
+      "in": 10.0,
+      "out": 14.5,
+      "mute": true
+    }
+  ]
+}
