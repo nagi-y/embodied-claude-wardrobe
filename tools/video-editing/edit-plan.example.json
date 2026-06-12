@@ -1,0 +1,26 @@
+{
+  "_comment": "編集プランの書式例。パスはこの JSON からの相対パス。filter はシーン個別にも全体にも指定できる（カラーグレーディング用 FFmpeg フィルタ）",
+  "output": "roughcut.mp4",
+  "filter": "eq=contrast=1.05:saturation=1.1:brightness=0.02",
+  "scenes": [
+    {
+      "scene": 1,
+      "title": "イントロ：課題の提示",
+      "candidates": ["takes/IMG_0101.mov", "takes/IMG_0102.mov", "takes/IMG_0103.mov"],
+      "chosen": "takes/IMG_0103.mov",
+      "reason": "言い淀みがなく、冒頭のつかみのテンポが最も良い。IMG_0101 は中盤で言い直しあり",
+      "in": 4.2,
+      "out": 41.8
+    },
+    {
+      "scene": 2,
+      "title": "デモ：ワークフローの実演",
+      "candidates": ["takes/IMG_0104.mov", "takes/IMG_0105.mov"],
+      "chosen": "takes/IMG_0104.mov",
+      "reason": "説明の順序が台本に忠実。IMG_0105 は途中でカメラ目線が外れる",
+      "in": 2.0,
+      "out": 95.5,
+      "filter": "eq=contrast=1.08:saturation=1.05"
+    }
+  ]
+}
