@@ -121,9 +121,10 @@ sqlite はバイナリでマージ不能。そこで **書き手を役割で分�
 - [x] 6. 設定テンプレート `self-sync.conf.sample`、運用ガイド `docs/guides/personal-repo-sync.md`、
   `BOOT_SHUTDOWN.md` 第七手（書き戻し）
 
-> 検証済み: 到達可能リポジトリ相手に clone(sparse)→branch→symlink→inbox→status を一時ディレクトリで通過。
-> session-boot 統合はライブの resume で graceful skip を確認。ingest のパーサは単体テスト通過。
-> 未検証: 実 `wardrobe-self` での push/PR（リポジトリ未作成のため）。
+> 検証済み（全経路）: 実リポジトリ `nagi-y/wardrobe-self`（Obsidian vault 構成で作成・初期化済み）に対し、
+> clone(sparse, `memory/db` 除外)→session ブランチ→symlink→inbox→push→**draft PR 自動作成（GH_TOKEN + REST）**
+> まで一気通貫で成功。session-boot 統合はライブ resume で graceful skip 確認。ingest パーサは単体テスト通過。
+> 残: ユーザー側の env 設定（web は `WARDROBE_SELF_REPO`/`WARDROBE_SELF_ROLE`、local は `self-sync.conf`）。
 
 ## この環境で確認した事実（2026-06-21）
 
