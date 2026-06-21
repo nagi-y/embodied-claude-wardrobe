@@ -99,7 +99,10 @@ sqlite はバイナリでマージ不能。そこで **書き手を役割で分�
 ## 未解決の判断（実装時に詰める）
 
 - **state.md の cross-env 競合**: 「今この瞬間」のスナップショットで本質的に競合する。
-  候補: `state.local.md` / `state.remote.md` に分割（推奨）/ last-writer-wins で気にしない。
+  **方針: 単一 `state.md` のまま、環境ごとのセクションを併記（または統合）する。**
+  ファイル分割（state.local.md / state.remote.md）はしない。
+  例: `## self (local)` / `## self (remote)` の小節に分け、各環境は自分の小節だけ書き換える
+  → 行レベルで衝突しにくく、PR でも auto-merge しやすい。ユーザー状態は共通セクションに統合。
 - **FLASH.md の競合**: 行追記ベースで大抵 auto-merge。リモートは PR で rebase 前提。
 - **PR レビュー負荷**: 毎セッション PR が増える。変更が実在するときだけ PR 化／自明なものは auto-merge 等で緩和。
 - **token が無い環境**: hook は「token あれば同期、無ければ skip して警告」と graceful degrade（配布物として壊さない）。
