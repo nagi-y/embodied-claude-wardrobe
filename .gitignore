@@ -112,6 +112,9 @@ tmp/*
 .claude/workingDirs/*
 !.claude/workingDirs/.keep
 
+# Inbox (personal notes, not tracked)
+inbox/
+
 # ダウンストリーム固有ファイル（アップストリームにはpushしない）
 ROUTINES.md
 SOUL.md
