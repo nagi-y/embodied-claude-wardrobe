@@ -1,0 +1,30 @@
+# self-sync.conf.sample — wardrobe-self（個人リポジトリ）同期設定
+#
+# このファイルを self-sync.conf にコピーして編集する。
+# self-sync.conf は .gitignore 済み（個人環境固有）。
+#
+# リモート/web 環境では、このファイルの代わりに環境変数で設定するのを推奨:
+#   WARDROBE_SELF_REPO / WARDROBE_SELF_ROLE / WARDROBE_SELF_DIR ...
+# （ephemeral コンテナでは gitignore されたファイルは再現されないため、
+#   Claude Code on the web の「環境変数」設定に入れる）
+#
+# 環境変数があればそちらが優先される（env → このファイル → デフォルト）。
+
+# 個人リポジトリ owner/repo。空のままだと同期は無効（graceful skip）
+WARDROBE_SELF_REPO=""
+
+# ローカルの clone 先。本体の sibling を推奨
+WARDROBE_SELF_DIR="${HOME}/wardrobe-self"
+
+# この環境のロール: local | remote
+#   local  = sqlite DB の唯一の writer。default ブランチへ直 push。inbox を ingest する
+#   remote = inbox に draft を積むだけ。DB は push しない（sparse-checkout で除外）。
+#            書き戻しは session ブランチ + PR
+# 迷ったら remote（append-only で安全側）
+WARDROBE_SELF_ROLE="remote"
+
+# 個人リポジトリの基底ブランチ（PR の base / local の push 先）
+WARDROBE_SELF_BASE="main"
+
+# remote ロールでセッションブランチに付ける接頭辞
+WARDROBE_SELF_BRANCH_PREFIX="session"

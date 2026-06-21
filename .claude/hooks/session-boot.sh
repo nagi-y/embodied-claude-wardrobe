@@ -13,6 +13,14 @@ MATCHER=$(echo "$INPUT" | grep -o '"matcher":"[^"]*"' | head -1 | cut -d'"' -f4 
 echo "[session-boot] type=${MATCHER:-unknown}"
 echo ""
 
+# --- wardrobe-self（個人リポジトリ）同期 ---
+# WARDROBE_SELF_REPO が未設定なら graceful skip。
+# clone/pull に成功すると SOUL.md/state.md 等が symlink で流し込まれ、以降の注入に乗る。
+if [ -x "$PROJECT_DIR/.claude/scripts/self-sync.sh" ]; then
+  /bin/bash "$PROJECT_DIR/.claude/scripts/self-sync.sh" pull 2>&1 | sed 's/^/  /'
+  echo ""
+fi
+
 # --- SOUL.md 注入 ---
 if [ -f "$PROJECT_DIR/SOUL.md" ]; then
   echo "--- SOUL.md ---"

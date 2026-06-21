@@ -1,7 +1,9 @@
 # personal repo 分離 — 設計メモ
 
-> 2026-06-21 リモート（Claude Code on the web）セッションで起草。実装前のレビュー用。
-> ステータス: **設計のみ。実装・リポジトリ作成は未着手。**
+> 2026-06-21 リモート（Claude Code on the web）セッションで起草。
+> ステータス: **実装済み（同期エンジン・ingest・スキル・hook 統合）。運用ガイドは
+> [`docs/guides/personal-repo-sync.md`](../guides/personal-repo-sync.md)。**
+> 残: 実 `wardrobe-self` リポジトリの作成と env 設定（ユーザー側）、PR 自動作成の認証付き実証。
 
 ## 動機
 
@@ -108,16 +110,20 @@ sqlite はバイナリでマージ不能。そこで **書き手を役割で分�
 - **token が無い環境**: hook は「token あれば同期、無ければ skip して警告」と graceful degrade（配布物として壊さない）。
 - **network policy 依存**: 直 github.com アクセスはポリシー次第で塞がれうる。README に前提を明記。
 
-## 実装ステップ（最小形から段階的に）
+## 実装ステップ（実装済み）
 
-1. `sync-self.sh` — `wardrobe-self` を clone/pull → 個人ファイルを本体へ symlink。token 無ければ graceful skip
-2. `session-boot.sh` 拡張 — pull → symlink を組み込む（既存の SOUL/state 注入はそのまま）
-3. `/wd-remember` のリモート分岐 — DB に加え `memory/inbox/*.md` にも draft を書く
-4. ローカル用 `ingest-inbox.sh` — inbox → memory-mcp store → archive → DB commit
-5. 書き戻しスキル — commit → push → PR（初期は push まで自動・PR は手動/MCP で割り切り）
-6. README に前提（private repo / token / network policy / sibling 配置）を明記
+- [x] 1. `.claude/scripts/self-sync.sh` — clone/pull → symlink、`pull/link/inbox/push/status`。
+  remote は sparse-checkout で `memory/db` 除外。token 無ければ graceful skip
+- [x] 2. `session-boot.sh` 拡張 — 冒頭で `self-sync.sh pull` を実行（hook timeout を 45s に）
+- [x] 3. `/wd-remember` の remote 分岐 — DB に加え `self-sync.sh inbox` で draft を積む
+- [x] 4. `.claude/mcps/memory-mcp/scripts/ingest_inbox.py` — inbox → `save_with_auto_link` → archive
+- [x] 5. `/wd-sync` スキル — `pull/ingest/push/status`。push は retry 付き、remote は draft PR を best-effort 作成
+- [x] 6. 設定テンプレート `self-sync.conf.sample`、運用ガイド `docs/guides/personal-repo-sync.md`、
+  `BOOT_SHUTDOWN.md` 第七手（書き戻し）
 
-> 最初に動かすのは 1〜2（同期土台）。記憶ブリッジ（3〜5）はその上に乗せる。
+> 検証済み: 到達可能リポジトリ相手に clone(sparse)→branch→symlink→inbox→status を一時ディレクトリで通過。
+> session-boot 統合はライブの resume で graceful skip を確認。ingest のパーサは単体テスト通過。
+> 未検証: 実 `wardrobe-self` での push/PR（リポジトリ未作成のため）。
 
 ## この環境で確認した事実（2026-06-21）
 
