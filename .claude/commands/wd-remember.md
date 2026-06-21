@@ -52,6 +52,21 @@ NG: ReACTでinteroceptionスクリプトを実装した
 
 追記した内容を1行で返す。「記録した: [キーワード]」の形式。
 
+## remote ロールでの inbox 退避
+
+`WARDROBE_SELF_ROLE=remote`（web/ephemeral 環境）のときは、DB への保存はコンテナ破棄で消えるため、
+**記憶 draft を個人リポジトリの inbox にも積む**。これを local 環境が後で DB に ingest する（→ `/wd-sync`）。
+
+ステップ 1 の保存に加えて:
+
+```
+bash .claude/scripts/self-sync.sh inbox "$ARGUMENTS"
+```
+
+- `WARDROBE_SELF_REPO` 未設定なら graceful skip されるので、無条件に呼んでよい
+- emotion / importance を正確にしたい場合は、生成された `memory/inbox/<ts>.md` の frontmatter を編集する
+- local ロールでは DB 保存が永続記録になるので inbox 退避は不要（呼んでも害はない）
+
 ## 週替わり処理
 
 月曜の最初の /wd-remember で、先週のセクションを圧縮する:
