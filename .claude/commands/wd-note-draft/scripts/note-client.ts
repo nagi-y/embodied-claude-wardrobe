@@ -1,16 +1,17 @@
 #!/usr/bin/env bun
 // note の非公式 API クライアント。Cookie 認証 + 2 段階の下書き保存。
 //
-// note は公式 API を公開していない。ブラウザ ⇄ サーバ間の通信を再現して使う:
-//   画像アップロード : POST /api/v1/upload_image            (multipart)
-//   記事の新規作成   : POST /api/v1/text_notes              → { data: { id, key } }
-//   下書き保存       : POST /api/v1/text_notes/draft_save?id={id}&is_temp_saved=true
+// note は公式 API を公開していない。フロントエンド JS（Nuxt バンドル）を読んで再現した:
+//   画像アップロード : POST /api/v1/image_upload/note_picture  (multipart, field="file")
+//   記事の新規作成   : POST /api/v1/text_notes                 → { data: { id, key } }
+//   下書き保存       : POST /api/v1/text_notes/draft_save?id={id}
+//   （フロントは UPLOAD_IMAGE_FILE_OLD で note_picture、CREATE/UPDATE_NOTE で text_notes/draft_save）
 //
 // 認証は Cookie ベース。_note_session_v5 等のセッション Cookie と、
 // XSRF-TOKEN Cookie を復号した X-XSRF-TOKEN ヘッダが必要。
 //
 // ⚠ 非公式 API のため、フィールド名やレスポンス形状は予告なく変わりうる。
-//    調整が必要になりがちな箇所には [TUNE] を付けてある。
+//    調整が必要になりがちな箇所には [TUNE] を付けてある。環境変数で上書きできる。
 
 const BASE = "https://note.com";
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
@@ -90,26 +91,29 @@ export class NoteClient {
     const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "gif" ? "image/gif" : "image/png";
 
     const fd = new FormData();
-    // [TUNE] フィールド名。note のエディタは "file" を使う想定。環境変数で上書き可能。
+    // フロントの FormData は field="file"。[TUNE] 必要なら NOTE_UPLOAD_FIELD で上書き。
     fd.append(process.env.NOTE_UPLOAD_FIELD ?? "file", new Blob([bytes], { type: mime }), name);
 
-    const res = await fetch(`${BASE}/api/v1/upload_image`, {
+    // [TUNE] フロントは /api/v1/image_upload/note_picture を使う。NOTE_UPLOAD_ENDPOINT で上書き可。
+    const endpoint = process.env.NOTE_UPLOAD_ENDPOINT ?? "/api/v1/image_upload/note_picture";
+    const res = await fetch(`${BASE}${endpoint}`, {
       method: "POST",
       headers: this.headers(false), // Content-Type は fetch が boundary 付きで設定
       body: fd,
     });
     const txt = await res.text();
-    this.log("upload_image", res.status, txt.slice(0, 300));
-    if (!res.ok) throw new Error(`upload_image failed: ${res.status} ${txt.slice(0, 200)}`);
+    this.log("image_upload", res.status, txt.slice(0, 300));
+    if (!res.ok) throw new Error(`image upload failed (${endpoint}): ${res.status} ${txt.slice(0, 200)}`);
     let data: any = {};
     try {
       data = JSON.parse(txt);
     } catch {
       /* ignore */
     }
-    // [TUNE] レスポンスの URL 取り出し。よくある形をいくつか試す。
-    const url = data?.data?.url ?? data?.url ?? data?.data?.image_url ?? data?.image_url ?? data?.data?.key;
-    if (!url) throw new Error(`upload_image: URL を取得できませんでした: ${txt.slice(0, 200)}`);
+    // [TUNE] レスポンスの URL 取り出し。note は data.url / data.path 系。複数の形を試す。
+    const url =
+      data?.data?.url ?? data?.url ?? data?.data?.path ?? data?.path ?? data?.data?.image_url ?? data?.image_url ?? data?.data?.key;
+    if (!url) throw new Error(`image upload: URL を取得できませんでした: ${txt.slice(0, 200)}`);
     return url;
   }
 

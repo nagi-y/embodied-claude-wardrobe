@@ -93,16 +93,19 @@ const x = 1; // コードブロック
 1. **作成** `POST /api/v1/text_notes` に `{name, body}` → `id` が返る
 2. **下書き保存** `POST /api/v1/text_notes/draft_save?id={id}&is_temp_saved=true` に
    `{name, body, body_length, index, is_lead_form}` を送る
-3. 画像は事前に `POST /api/v1/upload_image`（multipart）でアップロードし、本文 HTML の
-   `<figure><img src="..."></figure>` に URL を埋める
+3. 画像は事前に `POST /api/v1/image_upload/note_picture`（multipart, field=`file`）で
+   アップロードし、本文 HTML の `<figure><img src="..."></figure>` に URL を埋める
+
+> エンドポイントは note のフロントエンド JS（Nuxt バンドル）を解析して確認した実エンドポイント。
+> 参考記事にある `/api/v1/upload_image` は現行コードに存在しないため `note_picture` を使う。
 
 ## トラブルシュート
 
 - **401 / 403** → Cookie 切れ。`.env` を取り直す。
 - **422（作成/保存）** → 非公式 API の仕様変更。`scripts/note-client.ts` の `[TUNE]` 箇所
   （送信フィールド）を見直す。`--verbose` でレスポンスを確認。
-- **画像アップロードが失敗** → `NOTE_UPLOAD_FIELD` を変えるか、`upload_image` のレスポンス
-  キー取り出し（`note-client.ts` の `[TUNE]`）を調整。
+- **画像アップロードが失敗** → `NOTE_UPLOAD_ENDPOINT` / `NOTE_UPLOAD_FIELD` を変えるか、
+  レスポンスの URL キー取り出し（`note-client.ts` の `[TUNE]`）を調整。`--verbose` で生レスポンス確認。
 - **本文は出るが画像が出ない** → 下書きはできているので、note のエディタで画像だけ差し替えても良い。
 
 ## ファイル構成
