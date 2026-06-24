@@ -102,6 +102,21 @@ create_episode(title="セッション名", memory_ids=[...])
 consolidate_memories(window_hours=24)
 ```
 
+### 第七手: 個人リポジトリへ書き戻す（wardrobe-self 同期時）
+
+`WARDROBE_SELF_REPO` が設定されている場合、更新した state.md / FLASH.md / TODO.md / inbox を
+個人リポジトリへ書き戻す。これをしないと ephemeral 環境ではセッションの痕跡が消える。
+
+```
+/wd-sync push
+```
+
+- **remote ロール**（web）— session ブランチへ push され、draft PR が作られる。人間が merge する
+- **local ロール** — default ブランチへ直 push される
+- 未設定なら graceful skip されるので、無条件に実行してよい
+
+> local 環境では起動時に、リモートが積んだ記憶 draft を `/wd-sync ingest` で DB に取り込むこと。
+
 ---
 
 ## コンパクション後の復帰

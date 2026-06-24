@@ -1,6 +1,6 @@
 # Claude Code サブエージェント — 最新仕様まとめ
 
-> 出典: https://code.claude.com/docs/en/sub-agents + CHANGELOG 1.0.0〜2.1.87 (2026-03-29 取得)
+> 出典: https://code.claude.com/docs/en/sub-agents + CHANGELOG 1.0.0〜2.1.167 (2026-06-06 取得)
 
 ## 導入・進化の経緯
 
@@ -23,6 +23,18 @@
 | 2.1.49 | isolation: worktree 対応、background: true フィールド |
 | 2.1.50 | isolation: worktree をエージェント定義に宣言的に設定可能 |
 | 2.1.63 | Task→Agent リネーム完了（Task は引き続きエイリアスとして動作） |
+| 2.1.133 | サブエージェントがプロジェクト・ユーザー・プラグインスキルを検出できなかった不具合を修正 |
+| 2.1.139 | エージェントビュー（Research Preview）追加: `claude agents` で全セッションを管理 |
+| 2.1.140 | `subagent_type` マッチングが大文字/小文字を区別しなくなった |
+| 2.1.141 | `/bg` または `←←` で起動したバックグラウンドエージェントが permission mode を継承 |
+| 2.1.142 | `claude agents` に `--add-dir` / `--settings` / `--mcp-config` / `--plugin-dir` フラグ追加 |
+| 2.1.143 | `worktree.bgIsolation: "none"` でバックグラウンドセッションがワークツリーなしで作業ディレクトリを直接編集可能 |
+| 2.1.144 | `claude agents --json` で実行中セッションを JSON 出力、`--cwd` でディレクトリ絞り込み |
+| 2.1.147 | Agent SDK の OTEL スパンに `agent_id` と `parent_agent_id` 属性を追加 |
+| 2.1.154 | ダイナミックワークフロー: 数十〜数百エージェントを並列オーケストレーション（`/workflows`）|
+| 2.1.157 | エージェント起動時に settings.json の `agent` フィールドを参照するように |
+| 2.1.162 | `claude agents --json` に `waitingFor` フィールド追加（ブロック中のセッションが何待ちか表示）|
+| 2.1.163 | バックグラウンドエージェントのセッションがバックグラウンドで Claude Code を自動更新 |
 
 ## ビルトインサブエージェント
 
@@ -97,6 +109,29 @@ mcpServers:
 - Ctrl+B でフォアグラウンドタスクをバックグラウンドに
 - background: true で常にバックグラウンド
 - Ctrl+F で全バックグラウンドエージェントをキル (2.1.47〜)
+- バックグラウンドセッションは `/resume` でも一覧に表示される（`bg` マーク付き, 2.1.144〜）
+
+### エージェントビュー（2.1.139〜 Research Preview）
+
+```bash
+claude agents          # 全セッション一覧
+claude agents --json   # JSON 出力
+claude agents --cwd .  # ディレクトリ絞り込み
+```
+
+`waitingFor` フィールド（2.1.162〜）でブロック中のセッションが何を待っているか確認できる。
+
+### ダイナミックワークフロー（2.1.154〜）
+
+`/workflows` コマンドで実行履歴を確認。数十〜数百エージェントを並列オーケストレーション可能。
+
+### worktree.bgIsolation（2.1.143〜）
+
+```json
+{ "worktree": { "bgIsolation": "none" } }
+```
+
+`none` にするとバックグラウンドセッションがワークツリーを作らずに作業ディレクトリを直接編集する。
 
 ## ワードローブ固有のメモ
 
@@ -105,4 +140,8 @@ mcpServers:
 - mcpServers インライン定義でメイン会話のコンテキストを汚さずに MCP を渡せる
 - skills プリロードで knowhow をサブエージェントに注入できる
 - worktree はワードローブの `git worktree` スキルと連携可能
-- `claude agents` CLI (2.1.50〜) で設定済みエージェント一覧表示
+- `claude agents` CLI で実行中セッションを管理（2.1.139〜）
+- サブエージェントからスキルを呼び出す際は v2.1.133 以降であることを確認（以前は検出バグあり）
+- `subagent_type` は大文字小文字を区別しなくなった（2.1.140〜）。エージェント名の表記ゆれに強くなった
+- Heartbeat（autonomous action）はバックグラウンドエージェントに近い動き。`worktree.bgIsolation: "none"` が有効かもしれない
+- `claude agents --json | jq '.[] | select(.waitingFor != null)'` でブロック中エージェントを確認できる（2.1.162〜）

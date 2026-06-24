@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command": "/bin/bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-boot.sh",
-            "timeout": 5
+            "timeout": 45
           },
           {
             "type": "command",
@@ -70,6 +70,7 @@
       "mcp__memory__*",
       "mcp__hearing__*",
       "mcp__wifi-cam__*",
+      "mcp__tts__*",
       "Bash(bun run:*)",
       "Bash(bun:*)",
       "Bash(git:*)",

@@ -108,9 +108,20 @@ tmp/*
 # Turn counter (session-specific)
 .claude/.turn-count
 
+# self-sync: 個人リポジトリ同期の設定とコンテナ固有マーカー
+# （*.sample はテンプレートとして追跡する）
+self-sync.conf
+.claude/.self-branch
+
+# self-sync が退避した実体ファイル
+*.pre-sync.bak
+
 # Working directories (.keep is tracked)
 .claude/workingDirs/*
 !.claude/workingDirs/.keep
+
+# Inbox (personal notes, not tracked)
+inbox/
 
 # ダウンストリーム固有ファイル（アップストリームにはpushしない）
 ROUTINES.md
